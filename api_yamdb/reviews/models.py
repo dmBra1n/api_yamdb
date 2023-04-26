@@ -1,7 +1,9 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
 import datetime
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from users.models import User
 
 
 class Category(models.Model):
@@ -52,13 +54,12 @@ class Review(models.Model):
         related_name='review',
         verbose_name='Произведение'
     )
-    # author = models.ForeignKey(
-    #     User,
-    #     on_delete=models.CASCADE,
-    #     related_name='review',
-    #     verbose_name='Автор',
-    #
-    # )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='review',
+        verbose_name='Автор',
+    )
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -76,7 +77,7 @@ class Review(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['title, author'],
+                fields=['title', 'author'],
                 name='unique_review'
             )
         ]
@@ -91,12 +92,12 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
     )
-    # author = models.ForeignKey(
-    #     User,
-    #     on_delete=models.CASCADE,
-    #     related_name='comments',
-    #     verbose_name='Автор'
-    # )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор'
+    )
     text = models.TextField(
         verbose_name='Комментарий'
     )
