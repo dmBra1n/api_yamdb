@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import Category, Genre, Title
 
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -11,6 +12,7 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -19,6 +21,7 @@ class GenreAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -35,10 +38,3 @@ class TitleAdmin(admin.ModelAdmin):
         return ', '.join([str(genre) for genre in obj.genres.all()])
 
     get_genres.short_description = 'genres'
-
-
-admin.site.register(Category, CategoryAdmin)
-
-admin.site.register(Genre, GenreAdmin)
-
-admin.site.register(Title, TitleAdmin)
