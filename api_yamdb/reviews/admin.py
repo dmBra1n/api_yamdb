@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Genre, Title
+from .models import Category, Genre, Title, Review, Comment
 
 
 @admin.register(Category)
@@ -37,4 +37,27 @@ class TitleAdmin(admin.ModelAdmin):
     def get_genres(self, obj):
         return ', '.join([str(genre) for genre in obj.genres.all()])
 
-    get_genres.short_description = 'genres'
+    get_genres.short_description = 'Жанры'
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'title',
+        'author',
+        'text',
+        'pub_date',
+        'score'
+    )
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'review',
+        'author',
+        'text',
+        'pub_date',
+    )
