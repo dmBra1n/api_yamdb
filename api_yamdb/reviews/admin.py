@@ -37,7 +37,7 @@ class TitleAdmin(admin.ModelAdmin):
     def get_genres(self, obj):
         return ', '.join([str(genre) for genre in obj.genres.all()])
 
-    get_genres.short_description = 'genres'
+    get_genres.short_description = 'Жанры'
 
 
 @admin.register(Review)

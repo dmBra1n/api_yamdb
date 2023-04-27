@@ -1,21 +1,18 @@
 import datetime
 
-import datetime
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from users.models import User
 
-from users.models import User
-
 
 class Category(models.Model):
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=256, verbose_name='Категория')
     slug = models.SlugField(unique=True)
 
     class Meta:
-        verbose_name_plural = 'categories'
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
@@ -25,6 +22,10 @@ class Genre(models.Model):
     name = models.CharField(max_length=256, verbose_name='Жанр')
     slug = models.SlugField(unique=True)
 
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
     def __str__(self):
         return self.name
 
@@ -32,7 +33,8 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256, verbose_name='Название')
     year = models.PositiveSmallIntegerField(verbose_name='Дата выхода')
-    description = models.TextField(blank=True, default='', verbose_name='Описание')
+    description = models.TextField(blank=True, default='',
+                                   verbose_name='Описание')
     genres = models.ManyToManyField(Genre, blank=True, verbose_name='Жанр')
     category = models.ForeignKey(
         Category,
@@ -50,6 +52,8 @@ class Title(models.Model):
                 name='check_year_lte_current_year',
             )
         ]
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name
@@ -79,7 +83,7 @@ class Review(models.Model):
             MinValueValidator(1, message='Оценка должна быть от 1 до 10'),
             MaxValueValidator(10, message='Оценка должна быть от 1 до 10'),
         ),
-        verbose_name='Оценки',
+        verbose_name='Оценка',
     )
 
     class Meta:
@@ -103,12 +107,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Комментарий',
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор'
     )
     author = models.ForeignKey(
         User,
