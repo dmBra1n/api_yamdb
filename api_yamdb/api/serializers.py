@@ -1,13 +1,22 @@
 import datetime
 
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg
+from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import (
     ModelSerializer,
     SerializerMethodField,
     ValidationError,
 )
 
-from reviews.models import Category, Genre, Title
+from reviews.models import (
+    Category,
+    Genre,
+    Title,
+    Review,
+    Comment,
+)
+from users.models import User
 
 
 class CategorySerializer(ModelSerializer):
@@ -32,8 +41,8 @@ class TitleSerializer(ModelSerializer):
         model = Title
 
     def get_rating(self, obj):
-        rating = None
-        return rating
+        if obj.reviews.exists():
+            return int(obj.reviews.aggregate(Avg('score'))['score__avg'])
 
     def get_context_data(self):
         return self.context['request'].data
@@ -50,8 +59,8 @@ class TitleSerializer(ModelSerializer):
 
     def create(self, validated_data):
         data = self.get_context_data()
-        category = self.get_category(data['category'])
-        genres = self.get_genres(data['genres'])
+        category = self.get_category(slug=data.get('category'))
+        genres = self.get_genres(slug=data.get('genres'))
         title = Title.objects.create(category=category, **validated_data)
         title.genres.set(genres)
         return title
@@ -75,3 +84,52 @@ class TitleSerializer(ModelSerializer):
                 'Year can not be greater than the current year.'
             )
         return year
+
+
+class ReviewSerializer(ModelSerializer):
+    author = SlugRelatedField(slug_field='username', read_only=True)
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+        model = Review
+
+    def validate(self, data):
+        user = self.context['request'].user
+        title_id = self.context['view'].kwargs.get('title_id')
+        if user.reviews.filter(title__id=title_id).exists():
+            raise ValidationError(
+                'For every title only one review per user is allowed.'
+            )
+        return data
+
+
+class CommentSerializer(ModelSerializer):
+    author = SlugRelatedField(slug_field='username', read_only=True)
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date',)
+        model = Comment
+
+
+class UserSerializer(ModelSerializer):
+    class Meta:
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
+        model = User
+
+    def validate_username(self, username):
+        if username == 'me':
+            raise ValidationError(
+                "Username 'me' is not allowed."
+            )
+        return username
+
+
+class MeSerializer(ModelSerializer):
+    class Meta:
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
+        read_only_fields = ('role',)
+        model = User

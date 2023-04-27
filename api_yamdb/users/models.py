@@ -49,3 +49,12 @@ class User(AbstractUser):
         ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(
+                    username='me'
+                ),
+                name="username_not_equal_me"
+            ),
+        ]

@@ -46,18 +46,21 @@ class Title(models.Model):
             )
         ]
 
+    def __str__(self):
+        return self.name
+
 
 class Review(models.Model):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='review',
+        related_name='reviews',
         verbose_name='Произведение'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='review',
+        related_name='reviews',
         verbose_name='Автор',
     )
     text = models.TextField(verbose_name='Текст')
@@ -84,6 +87,9 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         ordering = ('-pub_date',)
+
+    def __str__(self):
+        return (self.author.username + ': ' + self.title.name)
 
 
 class Comment(models.Model):
