@@ -80,7 +80,7 @@ class TitleViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
 class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, IsAuthorOrModerator,)
     """
     Только зарегистрированные пользователи могут создавать, просматривать,
     обновлять и удалять отзывы.
@@ -101,7 +101,8 @@ class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
 class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin):
     """
-    Только аутентифицированные пользователи могут взаимодействовать с комментариями.
+    Только аутентифицированные пользователи могут взаимодействовать
+    с комментариями.
     """
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticated,)
