@@ -35,6 +35,7 @@ from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
     IsAuthorOrModerator,
+    IsAuthorOrReadOnly
 )
 
 from .filters import TitleFilter
@@ -118,7 +119,7 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     с комментариями.
     """
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerator)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly, )
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')
@@ -135,8 +136,7 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
         serializer.save(author=self.request.user, review=review)
 
 
-class UserViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
-                  mixins.UpdateModelMixin):
+class UserViewSet(viewsets.ModelViewSet):
     """
     Только администраторы могут просматривать, создавать
     и обновлять пользователей.
@@ -144,6 +144,7 @@ class UserViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^username',)
     lookup_field = 'username'
