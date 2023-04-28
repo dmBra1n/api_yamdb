@@ -1,5 +1,12 @@
+from django.db import IntegrityError
+from django.conf import settings
 from rest_framework import status, viewsets, mixins, filters
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import (
     AllowAny,
@@ -19,12 +26,16 @@ from .serializers import (
     CommentSerializer,
     UserSerializer,
     MeSerializer,
+    RegistrationSerializer,
+    GetTokenSerializer,
 )
+
 from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
     IsAuthorOrModerator,
 )
+
 from .filters import TitleFilter
 
 
@@ -80,6 +91,7 @@ class TitleViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
 class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin):
     serializer_class = ReviewSerializer
+
     permission_classes = (IsAuthenticated, IsAuthorOrModerator,)
     """
     Только зарегистрированные пользователи могут создавать, просматривать,
@@ -105,7 +117,9 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     с комментариями.
     """
     serializer_class = CommentSerializer
+
     permission_classes = (IsAuthenticated,)
+
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')
@@ -151,3 +165,57 @@ def me_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     serializer = MeSerializer(request.user)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserSignUpView(APIView):
+    """Регистрация users, генерация и отправка кода на почту"""
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = RegistrationSerializer(data=request.data)
+        if User.objects.filter(
+                username=request.data.get('user'),
+                email=request.data.get('email')
+        ).exists():
+            return Response(request.data, status=status.HTTP_200_OK)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        try:
+            user, create = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+        except IntegrityError:
+            raise ValidationError('Неверное имя пользователя или email')
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Регистрация на Yamdb',
+            message=f'Ваш код подтверждения: {confirmation_code}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email]
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetTokenView(APIView):
+    """Выдача токена."""
+    permission_classes = (AllowAny,)
+
+    def post(self, request):
+        serializer = GetTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        confirmation_code = serializer.validated_data.get('confirmation_code')
+        user = get_object_or_404(User, username=username)
+
+        if user.confirmation_code != confirmation_code:
+            return Response(
+                'Неверный код подтверждения',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {'access_token': str(refresh.access_token)},
+            status=status.HTTP_200_OK
+        )

@@ -7,7 +7,11 @@ from rest_framework.serializers import (
     ModelSerializer,
     SerializerMethodField,
     ValidationError,
+    Serializer,
+    CharField,
+    EmailField,
 )
+from users.validators import validate_username
 
 from reviews.models import (
     Category,
@@ -133,3 +137,26 @@ class MeSerializer(ModelSerializer):
         )
         read_only_fields = ('role',)
         model = User
+
+
+class RegistrationSerializer(Serializer):
+    """Сериализатор регистрации User."""
+    username = CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username],
+    )
+    email = EmailField(
+        required=True,
+        max_length=254
+    )
+
+
+class GetTokenSerializer(Serializer):
+    """Сериализатор токена"""
+    username = CharField(
+        required=True,
+        max_length=150,
+        validators=[validate_username]
+    )
+    confirmation_code = CharField(required=True)
