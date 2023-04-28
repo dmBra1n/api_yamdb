@@ -34,6 +34,12 @@ YaMDb - база отзывов о фильмах, книгах и музыке.
   python manage.py migrate
 ```
 
+Загрузите данные из csv файлов:
+
+```bash
+  python manage.py import_csv
+```
+
 Запустите сервер:
 
 ```bash
