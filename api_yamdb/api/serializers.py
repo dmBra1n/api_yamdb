@@ -48,15 +48,12 @@ class TitleSerializer(ModelSerializer):
             return int(obj.reviews.aggregate(Avg('score'))['score__avg'])
 
     def get_context_category(self):
-        category = self.context['request'].data.get('category')
-        if category:
-            return Category.objects.filter(slug=category).first()
+        slug = self.context['request'].data.get('category', None)
+        return Category.objects.filter(slug=slug).first()
 
     def get_context_genres(self):
-        genres = self.context['request'].data.get('genre')
-        if genres:
-            return Genre.objects.filter(slug__in=genres)
-        return []
+        slugs = self.context['request'].data.get('genre', [])
+        return Genre.objects.filter(slug__in=slugs)
 
     def create(self, validated_data):
         category = self.get_context_category()
