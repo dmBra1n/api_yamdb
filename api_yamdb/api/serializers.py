@@ -122,13 +122,6 @@ class UserSerializer(ModelSerializer):
         )
         model = User
 
-    def validate_username(self, username):
-        if username == 'me':
-            raise ValidationError(
-                "Username 'me' is not allowed."
-            )
-        return username
-
 
 class MeSerializer(ModelSerializer):
     class Meta:
