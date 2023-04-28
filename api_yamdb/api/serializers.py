@@ -1,6 +1,5 @@
 import datetime
 
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import (
@@ -52,19 +51,15 @@ class TitleSerializer(ModelSerializer):
         return self.context['request'].data
 
     def get_category(self, slug):
-        return get_object_or_404(Category, slug=slug)
+        return Category.objects.filter(slug=slug).first()
 
     def get_genres(self, slugs):
-        genres = []
-        for slug in slugs:
-            genre = get_object_or_404(Genre, slug=slug)
-            genres.append(genre)
-        return genres
+        return Genre.objects.filter(slug__in=slugs)
 
     def create(self, validated_data):
         data = self.get_context_data()
-        category = self.get_category(slug=data.get('category'))
-        genres = self.get_genres(slug=data.get('genres'))
+        category = self.get_category(data.get('category'))
+        genres = self.get_genres(data.get('genre'))
         title = Title.objects.create(category=category, **validated_data)
         title.genres.set(genres)
         return title
@@ -77,8 +72,8 @@ class TitleSerializer(ModelSerializer):
             instance.description
         )
         data = self.get_context_data()
-        instance.category = self.get_category(data['category'])
-        instance.genres.set(self.get_genres(data['genres']))
+        instance.category = self.get_category(data.get(['category']))
+        instance.genres.set(self.get_genres(data.get(['genre'])))
         instance.save()
         return instance
 

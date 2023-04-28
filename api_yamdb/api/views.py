@@ -1,7 +1,8 @@
+import random
+
 from django.db import IntegrityError
 from django.conf import settings
 from rest_framework import status, viewsets, mixins, filters
-from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -83,7 +84,7 @@ class TitleViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     """
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
@@ -92,7 +93,7 @@ class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin):
     serializer_class = ReviewSerializer
 
-    permission_classes = (IsAuthenticated, IsAuthorOrModerator,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerator,)
     """
     Только зарегистрированные пользователи могут создавать, просматривать,
     обновлять и удалять отзывы.
@@ -117,9 +118,7 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     с комментариями.
     """
     serializer_class = CommentSerializer
-
-    permission_classes = (IsAuthenticated,)
-
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerator)
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')
@@ -181,14 +180,15 @@ class UserSignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data.get('email')
         username = serializer.validated_data.get('username')
+        confirmation_code = str(random.randint(1000, 9999))
         try:
             user, create = User.objects.get_or_create(
                 username=username,
-                email=email
+                email=email,
+                confirmation_code=confirmation_code
             )
         except IntegrityError:
             raise ValidationError('Неверное имя пользователя или email')
-        confirmation_code = default_token_generator.make_token(user)
         send_mail(
             subject='Регистрация на Yamdb',
             message=f'Ваш код подтверждения: {confirmation_code}',
