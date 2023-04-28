@@ -1,5 +1,4 @@
 import datetime
-from abc import ABC
 
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg
@@ -12,6 +11,7 @@ from rest_framework.serializers import (
     CharField,
     EmailField,
 )
+from users.validators import validate_username
 
 from reviews.models import (
     Category,
@@ -143,9 +143,8 @@ class RegistrationSerializer(Serializer):
     """Сериализатор регистрации User."""
     username = CharField(
         required=True,
-        max_length=150
-        # TODO дописать validators
-        # validators = [validate_username]
+        max_length=150,
+        validators=[validate_username],
     )
     email = EmailField(
         required=True,
@@ -157,8 +156,7 @@ class GetTokenSerializer(Serializer):
     """Сериализатор токена"""
     username = CharField(
         required=True,
-        max_length=150
-        # TODO дописать validators
-        # validators = [validate_username])
+        max_length=150,
+        validators=[validate_username]
     )
     confirmation_code = CharField(required=True)

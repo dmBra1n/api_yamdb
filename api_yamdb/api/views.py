@@ -29,7 +29,6 @@ from .serializers import (
     RegistrationSerializer,
     GetTokenSerializer,
 )
-# from .permissions import IsAuthorOrReadOnly
 
 from .filters import TitleFilter
 
@@ -72,7 +71,7 @@ class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin):
     serializer_class = ReviewSerializer
 
-    # permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_title(self, **kwargs):
         title_id = kwargs.get('title_id')
@@ -91,7 +90,7 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin):
     serializer_class = CommentSerializer
 
-    # permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')
