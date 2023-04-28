@@ -30,6 +30,12 @@ from .serializers import (
     GetTokenSerializer,
 )
 
+from .permissions import (
+    IsAdmin,
+    IsAdminOrReadOnly,
+    IsAuthorOrModerator,
+)
+
 from .filters import TitleFilter
 
 
@@ -41,18 +47,29 @@ class ListCreateDestroyViewSet(mixins.ListModelMixin,
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
+    """
+    Вьюсет для просмотра, создания и удаления категорий.
+    Пользователи с правами администратора могут создавать,
+    изменять и удалять категории.
+    Пользователи без прав администратора могут только просматривать категории.
+    """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
     lookup_field = 'slug'
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
+    """
+    Только пользователи с правами администратора могут выполнять
+    действия, которые изменяют данные (POST, PUT, PATCH, DELETE).
+    Любой пользователь может просматривать данные (GET).
+    """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
     lookup_field = 'slug'
@@ -60,9 +77,13 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin):
+    """
+    Любой пользователь может просматривать данные объекта,
+    но только администраторы могут вносить изменения.
+    """
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
@@ -71,8 +92,11 @@ class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin):
     serializer_class = ReviewSerializer
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-
+    permission_classes = (IsAuthenticated, IsAuthorOrModerator,)
+    """
+    Только зарегистрированные пользователи могут создавать, просматривать,
+    обновлять и удалять отзывы.
+    """
     def get_title(self, **kwargs):
         title_id = kwargs.get('title_id')
         return get_object_or_404(Title, id=title_id)
@@ -88,9 +112,14 @@ class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
 
 class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                      mixins.UpdateModelMixin):
+    """
+    Только аутентифицированные пользователи могут взаимодействовать
+    с комментариями.
+    """
     serializer_class = CommentSerializer
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
+
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')
@@ -109,9 +138,13 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
 
 class UserViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin):
+    """
+    Только администраторы могут просматривать, создавать
+    и обновлять пользователей.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^username',)
     lookup_field = 'username'
@@ -120,6 +153,9 @@ class UserViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
 @api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def me_view(request):
+    """
+    Доступ к данной функции имеют только авторизованные пользователи.
+    """
     if request.method == 'PATCH':
         serializer = MeSerializer(request.user, data=request.data,
                                   partial=True)
