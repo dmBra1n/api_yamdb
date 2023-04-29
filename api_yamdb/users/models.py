@@ -37,11 +37,6 @@ class User(AbstractUser):
         verbose_name='Роль'
     )
 
-    confirmation_code = models.CharField(
-        max_length=100,
-        blank=True
-    )
-
     @property
     def is_moderator(self):
         return self.role == self.MODERATOR_ROLE_NAME

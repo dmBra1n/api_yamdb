@@ -136,6 +136,9 @@ class RegistrationSerializer(Serializer):
         max_length=254
     )
 
+    class Meta:
+        fields = ('username', 'email',)
+
 
 class GetTokenSerializer(Serializer):
     """Сериализатор токена"""

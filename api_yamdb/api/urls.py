@@ -9,8 +9,8 @@ from .views import (
     CommentViewSet,
     UserViewSet,
     me_view,
-    UserSignUpView,
-    GetTokenView,
+    get_token,
+    user_signup,
 
 )
 app_name = 'api'
@@ -31,8 +31,8 @@ router.register('titles', TitleViewSet, basename='title')
 router.register('users', UserViewSet, basename='user')
 
 registration_urlpatterns = [
-    path('auth/signup/', UserSignUpView.as_view(), name='sign_up'),
-    path('auth/token/', GetTokenView.as_view(), name='get_token')
+    path('auth/signup/', user_signup, name='sign_up'),
+    path('auth/token/', get_token, name='get_token')
 ]
 
 urlpatterns = [
