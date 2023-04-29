@@ -47,32 +47,18 @@ class TitleSerializer(ModelSerializer):
         if obj.reviews.exists():
             return int(obj.reviews.aggregate(Avg('score'))['score__avg'])
 
-    def get_context_category(self):
-        slug = self.context['request'].data.get('category', None)
-        return Category.objects.filter(slug=slug).first()
 
-    def get_context_genres(self):
-        slugs = self.context['request'].data.get('genre', [])
-        return Genre.objects.filter(slug__in=slugs)
+class TitleWriteSerializer(ModelSerializer):
+    category = SlugRelatedField(
+        slug_field='slug', queryset=Category.objects.all()
+    )
+    genre = SlugRelatedField(
+        slug_field='slug', queryset=Genre.objects.all(), many=True
+    )
 
-    def create(self, validated_data):
-        category = self.get_context_category()
-        genres = self.get_context_genres()
-        title = Title.objects.create(category=category, **validated_data)
-        title.genre.set(genres)
-        return title
-
-    def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.year = validated_data.get('year', instance.year)
-        instance.description = validated_data.get(
-            'description',
-            instance.description
-        )
-        instance.category = self.get_context_category()
-        instance.genre.set(self.get_context_genres())
-        instance.save()
-        return instance
+    class Meta:
+        fields = '__all__'
+        model = Title
 
     def validate_year(self, year):
         if year > datetime.datetime.now().year:
@@ -91,8 +77,12 @@ class ReviewSerializer(ModelSerializer):
 
     def validate(self, data):
         user = self.context['request'].user
+        method = self.context['request'].method
         title_id = self.context['view'].kwargs.get('title_id')
-        if user.reviews.filter(title__id=title_id).exists():
+        if (
+            method == 'POST'
+            and user.reviews.filter(title__id=title_id).exists()
+        ):
             raise ValidationError(
                 'For every title only one review per user is allowed.'
             )
