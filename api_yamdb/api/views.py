@@ -20,6 +20,7 @@ from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
+    TitleWriteSerializer,
     ReviewSerializer,
     CommentSerializer,
     UserSerializer,
@@ -30,7 +31,7 @@ from .serializers import (
 from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
-    IsAuthorOrModerator,
+    IsAuthorOrModeratorOrAdminOrReadOnly
 )
 from .filters import TitleFilter
 
@@ -51,7 +52,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     """
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
     lookup_field = 'slug'
@@ -65,7 +66,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     """
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
     lookup_field = 'slug'
@@ -83,16 +84,24 @@ class TitleViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleSerializer
+        return TitleWriteSerializer
+
 
 class ReviewViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin):
-    serializer_class = ReviewSerializer
-
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerator,)
     """
     Только зарегистрированные пользователи могут создавать, просматривать,
     обновлять и удалять отзывы.
     """
+
+    serializer_class = ReviewSerializer
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrAdminOrReadOnly
+    )
 
     def get_title(self, **kwargs):
         title_id = kwargs.get('title_id')
@@ -114,7 +123,11 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     с комментариями.
     """
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerator,)
+
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrAdminOrReadOnly
+    )
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')

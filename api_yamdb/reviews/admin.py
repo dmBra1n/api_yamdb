@@ -35,7 +35,7 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description',)
 
     def get_genres(self, obj):
-        return ', '.join([str(genre) for genre in obj.genres.all()])
+        return ', '.join([str(genre) for genre in obj.genre.all()])
 
     get_genres.short_description = 'Жанры'
 
