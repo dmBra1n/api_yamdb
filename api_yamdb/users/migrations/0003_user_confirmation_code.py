@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('users', '0002_user_username_not_equal_me'),
+        ("users", "0002_user_username_not_equal_me"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='confirmation_code',
+            model_name="user",
+            name="confirmation_code",
             field=models.CharField(blank=True, max_length=100),
         ),
     ]

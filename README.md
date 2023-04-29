@@ -85,9 +85,9 @@ YaMDb - база отзывов о фильмах, книгах и музыке.
 
 ## Авторы
 
-- Имя Фамилия - [ссылка на GitHub](https://github.com/username)
-- Имя Фамилия - [ссылка на GitHub](https://github.com/username)
-- Потапов О.В. - [ссылка на GitHub](https://github.com/username)
+- Гурьев Д.В. - [ссылка на GitHub](https://github.com/dibbas)
+- Миронов В.А. - [ссылка на GitHub](https://github.com/dmBra1n)
+- Потапов О.В. - [ссылка на GitHub](https://github.com/wizarding-anonymous)
 
 ## Лицензия
 
