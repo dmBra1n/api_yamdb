@@ -151,7 +151,8 @@ class UserViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 def me_view(request):
     """
-    Доступ к данной функции имеют только авторизованные пользователи.
+    Доступ к данной функции имеют
+    только авторизованные пользователи.
     """
     if request.method == 'PATCH':
         serializer = MeSerializer(request.user, data=request.data,

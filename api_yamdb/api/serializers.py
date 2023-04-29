@@ -23,18 +23,21 @@ from users.models import User
 
 
 class CategorySerializer(ModelSerializer):
+    """Сериализатор модели Category"""
     class Meta:
         fields = ('name', 'slug',)
         model = Category
 
 
 class GenreSerializer(ModelSerializer):
+    """Сериализатор модели Genre"""
     class Meta:
         fields = ('name', 'slug',)
         model = Genre
 
 
 class TitleSerializer(ModelSerializer):
+    """Сериализатор модели Title"""
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     rating = SerializerMethodField()
@@ -44,18 +47,22 @@ class TitleSerializer(ModelSerializer):
         model = Title
 
     def get_rating(self, obj):
+        """Метод, возвращающий среднюю оценку для объекта Title."""
         if obj.reviews.exists():
             return int(obj.reviews.aggregate(Avg('score'))['score__avg'])
 
     def get_context_category(self):
+        """Метод, получающий категорию из запроса."""
         slug = self.context['request'].data.get('category', None)
         return Category.objects.filter(slug=slug).first()
 
     def get_context_genres(self):
+        """Метод, получающий жанры из запроса."""
         slugs = self.context['request'].data.get('genre', [])
         return Genre.objects.filter(slug__in=slugs)
 
     def create(self, validated_data):
+        """Метод создания объекта Title."""
         category = self.get_context_category()
         genres = self.get_context_genres()
         title = Title.objects.create(category=category, **validated_data)
@@ -63,6 +70,7 @@ class TitleSerializer(ModelSerializer):
         return title
 
     def update(self, instance, validated_data):
+        """Метод обновления объекта Title."""
         instance.name = validated_data.get('name', instance.name)
         instance.year = validated_data.get('year', instance.year)
         instance.description = validated_data.get(
@@ -75,6 +83,7 @@ class TitleSerializer(ModelSerializer):
         return instance
 
     def validate_year(self, year):
+        """етод валидации года выпуска объекта Title."""
         if year > datetime.datetime.now().year:
             raise ValidationError(
                 'Year can not be greater than the current year.'
@@ -83,6 +92,7 @@ class TitleSerializer(ModelSerializer):
 
 
 class ReviewSerializer(ModelSerializer):
+    """Сериализатор отзывов."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -90,16 +100,21 @@ class ReviewSerializer(ModelSerializer):
         model = Review
 
     def validate(self, data):
+        """
+        Проверяет, что пользователь оставил только
+        один отзыв на произведение.
+        """
         user = self.context['request'].user
         title_id = self.context['view'].kwargs.get('title_id')
         if user.reviews.filter(title__id=title_id).exists():
             raise ValidationError(
-                'For every title only one review per user is allowed.'
+                'Разрешен только один отзыв на пользователя.'
             )
         return data
 
 
 class CommentSerializer(ModelSerializer):
+    """Сериализатор коментариев."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -108,6 +123,7 @@ class CommentSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
+    """Сериализатор рользователей."""
     class Meta:
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
@@ -116,6 +132,7 @@ class UserSerializer(ModelSerializer):
 
 
 class MeSerializer(ModelSerializer):
+    """Сериализатор пользователя для получения и изменения своего профиля."""
     class Meta:
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
@@ -125,7 +142,7 @@ class MeSerializer(ModelSerializer):
 
 
 class RegistrationSerializer(Serializer):
-    """Сериализатор регистрации User."""
+    """Сериализатор регистрации пользователей."""
     username = CharField(
         required=True,
         max_length=150,

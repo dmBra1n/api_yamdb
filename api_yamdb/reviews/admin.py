@@ -5,6 +5,10 @@ from .models import Category, Genre, Title, Review, Comment
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    """
+    Администраторская панель для модели Category.
+    Поля: pk, name, slug.
+    """
     list_display = (
         'pk',
         'name',
@@ -14,6 +18,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
+    """
+    Администраторская панель для модели Genre.
+    Поля: pk, name, slug.
+    """
     list_display = (
         'pk',
         'name',
@@ -23,6 +31,10 @@ class GenreAdmin(admin.ModelAdmin):
 
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
+    """
+    Администраторская панель для модели Title.
+    Поля: pk, name, year, description, genres, category.
+    """
     list_display = (
         'pk',
         'name',
@@ -35,6 +47,9 @@ class TitleAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description',)
 
     def get_genres(self, obj):
+        """
+        Возвращает список жанров, связанных с объектом.
+        """
         return ', '.join([str(genre) for genre in obj.genres.all()])
 
     get_genres.short_description = 'Жанры'
@@ -42,6 +57,10 @@ class TitleAdmin(admin.ModelAdmin):
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
+    """
+    Администраторская панель для модели Review.
+    Поля: pk, title, author, text, pub_date, score.
+    """
     list_display = (
         'pk',
         'title',
@@ -54,6 +73,10 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
+    """
+    Администраторская панель для модели Comment.
+    Поля: pk, review, author, text, pub_date.
+    """
     list_display = (
         'pk',
         'review',

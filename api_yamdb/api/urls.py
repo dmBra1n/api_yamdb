@@ -15,6 +15,8 @@ from .views import (
 )
 app_name = 'api'
 
+# Создание роутера и регистрация ViewSet'ов
+router = DefaultRouter()
 router = DefaultRouter()
 router.register('categories', CategoryViewSet, basename='category')
 router.register('genres', GenreViewSet, basename='genre')
@@ -30,14 +32,15 @@ router.register(
 router.register('titles', TitleViewSet, basename='title')
 router.register('users', UserViewSet, basename='user')
 
+# Определение URL-шаблонов
 registration_urlpatterns = [
     path('auth/signup/', UserSignUpView.as_view(), name='sign_up'),
     path('auth/token/', GetTokenView.as_view(), name='get_token')
 ]
 
 urlpatterns = [
-    path('v1/', include(registration_urlpatterns)),
-    path('v1/users/me/', me_view),
-    path('v1/', include(router.urls)),
+    path('v1/', include(registration_urlpatterns)), # URL-шаблоны регистрации
+    path('v1/users/me/', me_view), # URL для получения инфо о текущем пользователе
+    path('v1/', include(router.urls)), # URL-шаблоны API
 
 ]
