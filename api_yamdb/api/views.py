@@ -30,14 +30,11 @@ from .serializers import (
     RegistrationSerializer,
     GetTokenSerializer,
 )
-
 from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
     IsAuthorOrModerator,
-    IsAuthorOrReadOnly
 )
-
 from .filters import TitleFilter
 
 
@@ -119,7 +116,7 @@ class CommentViewSet(ListCreateDestroyViewSet, mixins.RetrieveModelMixin,
     с комментариями.
     """
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly, )
+    permission_classes = (IsAuthenticatedOrReadOnly, IsAuthorOrModerator, )
 
     def get_review(self, **kwargs):
         title_id = kwargs.get('title_id')
