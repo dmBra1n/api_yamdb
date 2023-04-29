@@ -9,5 +9,6 @@ class ApiConfig(AppConfig):
     созданных в приложении.
     - name -- уникальное имя приложения.
     """
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'api'
+
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "api"

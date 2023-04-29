@@ -1,46 +1,40 @@
+from users.validators import validate_username
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from users.validators import validate_username
-
 
 class User(AbstractUser):
-    USER_ROLE_NAME = 'user'
-    MODERATOR_ROLE_NAME = 'moderator'
-    ADMIN_ROLE_NAME = 'admin'
+    USER_ROLE_NAME = "user"
+    MODERATOR_ROLE_NAME = "moderator"
+    ADMIN_ROLE_NAME = "admin"
 
     ROLES = [
-        (USER_ROLE_NAME, 'User'),
-        (MODERATOR_ROLE_NAME, 'Moderator'),
-        (ADMIN_ROLE_NAME, 'Admin'),
+        (USER_ROLE_NAME, "User"),
+        (MODERATOR_ROLE_NAME, "Moderator"),
+        (ADMIN_ROLE_NAME, "Admin"),
     ]
     username = models.CharField(
         max_length=150,
         unique=True,
-        verbose_name='Имя пользователя',
+        verbose_name="Имя пользователя",
         validators=[validate_username],
     )
     email = models.EmailField(
         unique=True,
         blank=False,
         null=False,
-        verbose_name='Адрес электронной почты'
+        verbose_name="Адрес электронной почты",
     )
-    bio = models.TextField(
-        blank=True,
-        verbose_name='Биография'
-    )
+    bio = models.TextField(blank=True, verbose_name="Биография")
     role = models.CharField(
         max_length=30,
         default=USER_ROLE_NAME,
         choices=ROLES,
-        verbose_name='Роль'
+        verbose_name="Роль",
     )
 
-    confirmation_code = models.CharField(
-        max_length=100,
-        blank=True
-    )
+    confirmation_code = models.CharField(max_length=100, blank=True)
 
     @property
     def is_moderator(self):
@@ -54,6 +48,6 @@ class User(AbstractUser):
         return self.username
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        ordering = ("id",)
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
