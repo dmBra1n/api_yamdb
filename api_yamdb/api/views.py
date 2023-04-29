@@ -1,17 +1,13 @@
-import random
-
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.conf import settings
 from rest_framework import status, viewsets, mixins, filters
 from django.core.mail import send_mail
 from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import (
-    AllowAny,
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
