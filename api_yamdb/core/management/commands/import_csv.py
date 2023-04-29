@@ -77,7 +77,7 @@ class Command(BaseCommand):
                 except ObjectDoesNotExist:
                     continue
 
-                title.genres.add(genre)
+                title.genre.add(genre)
 
     def import_reviews(self, file_name: str):
         file_path = self.get_file_path(file_name)

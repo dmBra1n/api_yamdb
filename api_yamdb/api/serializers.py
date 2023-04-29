@@ -1,6 +1,5 @@
 import datetime
 
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import (
@@ -37,7 +36,7 @@ class GenreSerializer(ModelSerializer):
 
 class TitleSerializer(ModelSerializer):
     category = CategorySerializer(read_only=True)
-    genres = GenreSerializer(read_only=True, many=True)
+    genre = GenreSerializer(read_only=True, many=True)
     rating = SerializerMethodField()
 
     class Meta:
@@ -48,25 +47,19 @@ class TitleSerializer(ModelSerializer):
         if obj.reviews.exists():
             return int(obj.reviews.aggregate(Avg('score'))['score__avg'])
 
-    def get_context_data(self):
-        return self.context['request'].data
+    def get_context_category(self):
+        slug = self.context['request'].data.get('category', None)
+        return Category.objects.filter(slug=slug).first()
 
-    def get_category(self, slug):
-        return get_object_or_404(Category, slug=slug)
-
-    def get_genres(self, slugs):
-        genres = []
-        for slug in slugs:
-            genre = get_object_or_404(Genre, slug=slug)
-            genres.append(genre)
-        return genres
+    def get_context_genres(self):
+        slugs = self.context['request'].data.get('genre', [])
+        return Genre.objects.filter(slug__in=slugs)
 
     def create(self, validated_data):
-        data = self.get_context_data()
-        category = self.get_category(slug=data.get('category'))
-        genres = self.get_genres(slug=data.get('genres'))
+        category = self.get_context_category()
+        genres = self.get_context_genres()
         title = Title.objects.create(category=category, **validated_data)
-        title.genres.set(genres)
+        title.genre.set(genres)
         return title
 
     def update(self, instance, validated_data):
@@ -76,9 +69,8 @@ class TitleSerializer(ModelSerializer):
             'description',
             instance.description
         )
-        data = self.get_context_data()
-        instance.category = self.get_category(data['category'])
-        instance.genres.set(self.get_genres(data['genres']))
+        instance.category = self.get_context_category()
+        instance.genre.set(self.get_context_genres())
         instance.save()
         return instance
 
