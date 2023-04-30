@@ -1,12 +1,12 @@
 import csv
 
-from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand
 from django.db.models import Model
 
 from api_yamdb.settings import STATICFILES_DIRS
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import Category, Genre, Title, Review, Comment
 
 DATA_DIR = STATICFILES_DIRS[0] / 'data/'
 

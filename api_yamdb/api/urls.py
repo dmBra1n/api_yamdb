@@ -1,18 +1,10 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (
-    CategoryViewSet,
-    GenreViewSet,
-    TitleViewSet,
-    ReviewViewSet,
-    CommentViewSet,
-    UserViewSet,
-    me_view,
-    get_token,
-    user_signup,
+from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                    ReviewViewSet, TitleViewSet, UserViewSet, get_token,
+                    me_view, user_signup)
 
-)
 app_name = 'api'
 
 router = DefaultRouter()
@@ -39,5 +31,4 @@ urlpatterns = [
     path('v1/', include(registration_urlpatterns)),
     path('v1/users/me/', me_view),
     path('v1/', include(router.urls)),
-
 ]

@@ -9,7 +9,8 @@ class IsAdmin(permissions.BasePermission):
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
-    Чтение контента доступно любому пользователю. Изменение - админу.
+    Разрешение для чтения контента для всех пользователей
+    и для изменения контента только для админа.
     """
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
