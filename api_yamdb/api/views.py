@@ -1,39 +1,28 @@
-from django.contrib.auth.tokens import default_token_generator
-from django.db import IntegrityError
 from django.conf import settings
-from rest_framework import status, viewsets, mixins, filters
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
-)
-from django_filters.rest_framework import DjangoFilterBackend
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, status, viewsets
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Title
 from users.models import User
-from .serializers import (
-    CategorySerializer,
-    GenreSerializer,
-    TitleSerializer,
-    TitleWriteSerializer,
-    ReviewSerializer,
-    CommentSerializer,
-    UserSerializer,
-    MeSerializer,
-    RegistrationSerializer,
-    GetTokenSerializer,
-)
-from .permissions import (
-    IsAdmin,
-    IsAdminOrReadOnly,
-    IsAuthorOrModeratorOrAdminOrReadOnly
-)
+
 from .filters import TitleFilter
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorOrModeratorOrAdminOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, GetTokenSerializer, MeSerializer,
+                          RegistrationSerializer, ReviewSerializer,
+                          TitleSerializer, TitleWriteSerializer,
+                          UserSerializer)
 
 
 class ListCreateDestroyViewSet(mixins.ListModelMixin,

@@ -2,39 +2,33 @@ import datetime
 
 from django.db.models import Avg
 from rest_framework.relations import SlugRelatedField
-from rest_framework.serializers import (
-    ModelSerializer,
-    SerializerMethodField,
-    ValidationError,
-    Serializer,
-    CharField,
-    EmailField,
-)
-from users.validators import validate_username
+from rest_framework.serializers import (CharField, EmailField, ModelSerializer,
+                                        Serializer, SerializerMethodField,
+                                        ValidationError)
 
-from reviews.models import (
-    Category,
-    Genre,
-    Title,
-    Review,
-    Comment,
-)
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from users.validators import validate_username
 
 
 class CategorySerializer(ModelSerializer):
+    """Сериализатор модели Category"""
+
     class Meta:
         fields = ('name', 'slug',)
         model = Category
 
 
 class GenreSerializer(ModelSerializer):
+    """Сериализатор модели Genre"""
+
     class Meta:
         fields = ('name', 'slug',)
         model = Genre
 
 
 class TitleSerializer(ModelSerializer):
+    """Сериализатор модели Title"""
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(read_only=True, many=True)
     rating = SerializerMethodField()
@@ -69,6 +63,7 @@ class TitleWriteSerializer(ModelSerializer):
 
 
 class ReviewSerializer(ModelSerializer):
+    """Сериализатор отзывов."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -80,8 +75,8 @@ class ReviewSerializer(ModelSerializer):
         method = self.context['request'].method
         title_id = self.context['view'].kwargs.get('title_id')
         if (
-            method == 'POST'
-            and user.reviews.filter(title__id=title_id).exists()
+                method == 'POST'
+                and user.reviews.filter(title__id=title_id).exists()
         ):
             raise ValidationError(
                 'For every title only one review per user is allowed.'
@@ -90,6 +85,7 @@ class ReviewSerializer(ModelSerializer):
 
 
 class CommentSerializer(ModelSerializer):
+    """Сериализатор коментариев."""
     author = SlugRelatedField(slug_field='username', read_only=True)
 
     class Meta:
@@ -98,6 +94,7 @@ class CommentSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
+    """Сериализатор рользователей."""
     class Meta:
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
@@ -106,6 +103,7 @@ class UserSerializer(ModelSerializer):
 
 
 class MeSerializer(ModelSerializer):
+    """Сериализатор пользователя для получения и изменения своего профиля."""
     class Meta:
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
@@ -115,7 +113,7 @@ class MeSerializer(ModelSerializer):
 
 
 class RegistrationSerializer(Serializer):
-    """Сериализатор регистрации User."""
+    """Сериализатор регистрации пользователей."""
     username = CharField(
         required=True,
         max_length=150,
