@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
 from users.validators import validate_username
 
 
@@ -18,7 +17,7 @@ class User(AbstractUser):
         max_length=150,
         unique=True,
         verbose_name='Имя пользователя',
-        validators=[validate_username],
+        validators=(validate_username,),
     )
     email = models.EmailField(
         unique=True,
